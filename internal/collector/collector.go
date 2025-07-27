@@ -128,6 +128,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	defer k.Unlock()
 
 	keepalivedUp := float64(1)
+	connectionError := false
 
 	b := backoff.NewExponentialBackOff()
 	b.InitialInterval = 10 * time.Millisecond
@@ -151,11 +152,14 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 		slog.Error("No data found to be exported", "error", err)
 
 		keepalivedUp = 0
+		connectionError = true
 	}
 
 	k.newConstMetric(ch, "keepalived_up", prometheus.GaugeValue, keepalivedUp)
 
-	if keepalivedUp == 0 {
+	// If keepalived is down, return error metrics with -1 values and error label
+	if connectionError {
+		k.emitErrorMetrics(ch)
 		return
 	}
 
@@ -168,6 +172,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -177,6 +182,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -186,6 +192,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -195,6 +202,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -204,6 +212,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -213,6 +222,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -222,6 +232,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -231,6 +242,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -240,6 +252,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -249,6 +262,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -258,6 +272,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -267,6 +282,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -276,6 +292,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -285,6 +302,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 		k.newConstMetric(
 			ch,
@@ -294,6 +312,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 			vrrp.Data.IName,
 			vrrp.Data.Intf,
 			strconv.Itoa(vrrp.Data.VRID),
+			"",
 		)
 
 		for _, ip := range vrrp.Data.VIPs {
@@ -311,6 +330,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				intf,
 				strconv.Itoa(vrrp.Data.VRID),
 				ipAddr,
+				"",
 			)
 
 			if k.scriptPath != "" {
@@ -328,6 +348,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 					intf,
 					strconv.Itoa(vrrp.Data.VRID),
 					ipAddr,
+					"",
 				)
 			}
 		}
@@ -348,6 +369,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				intf,
 				strconv.Itoa(vrrp.Data.VRID),
 				ipAddr,
+				"",
 			)
 		}
 
@@ -362,6 +384,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				vrrp.Data.Intf,
 				strconv.Itoa(vrrp.Data.VRID),
 				"",
+				"",
 			)
 		}
 	}
@@ -373,7 +396,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				"name", script.Name,
 			)
 		} else {
-			k.newConstMetric(ch, "keepalived_script_status", prometheus.GaugeValue, float64(scriptStatus), script.Name)
+			k.newConstMetric(ch, "keepalived_script_status", prometheus.GaugeValue, float64(scriptStatus), script.Name, "")
 		}
 
 		if k.collector.HasVRRPScriptStateSupport() {
@@ -383,10 +406,45 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 					"name", script.Name,
 				)
 			} else {
-				k.newConstMetric(ch, "keepalived_script_state", prometheus.GaugeValue, float64(scriptState), script.Name)
+				k.newConstMetric(ch, "keepalived_script_state", prometheus.GaugeValue, float64(scriptState), script.Name, "")
 			}
 		}
 	}
+}
+
+func (k *KeepalivedCollector) emitErrorMetrics(ch chan<- prometheus.Metric) {
+	// Emit all metrics with -1 value and error label when keepalived is down
+	errorLabel := "keepalived is down"
+	
+	// Common labels for VRRP metrics
+	commonLabels := []string{"unknown", "unknown", "0"}
+	
+	// Emit all VRRP-related metrics with error state
+	k.newConstMetric(ch, "keepalived_advertisements_received_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_advertisements_sent_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_become_master_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_release_master_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_packet_length_errors_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_advertisements_interval_errors_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_ip_ttl_errors_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_invalid_type_received_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_address_list_errors_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_authentication_invalid_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_authentication_mismatch_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_authentication_failure_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_priority_zero_received_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_priority_zero_sent_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	k.newConstMetric(ch, "keepalived_gratuitous_arp_delay_total", prometheus.CounterValue, -1, append(commonLabels, errorLabel)...)
+	
+	// VRRP state metrics with additional ip_address label
+	vrrpStateLabels := []string{"unknown", "unknown", "0", "unknown", errorLabel}
+	k.newConstMetric(ch, "keepalived_vrrp_state", prometheus.GaugeValue, -1, vrrpStateLabels...)
+	k.newConstMetric(ch, "keepalived_vrrp_excluded_state", prometheus.GaugeValue, -1, vrrpStateLabels...)
+	k.newConstMetric(ch, "keepalived_exporter_check_script_status", prometheus.GaugeValue, -1, vrrpStateLabels...)
+	
+	// Script metrics
+	k.newConstMetric(ch, "keepalived_script_status", prometheus.GaugeValue, -1, "unknown", errorLabel)
+	k.newConstMetric(ch, "keepalived_script_state", prometheus.GaugeValue, -1, "unknown", errorLabel)
 }
 
 func (k *KeepalivedCollector) getKeepalivedStats() (*KeepalivedStats, error) {
@@ -482,25 +540,25 @@ func (k *KeepalivedCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (k *KeepalivedCollector) fillMetrics() {
-	commonLabels := []string{"iname", "intf", "vrid"}
+	commonLabels := []string{"iname", "intf", "vrid", "error"}
 	k.metrics = map[string]*prometheus.Desc{
 		"keepalived_up": prometheus.NewDesc("keepalived_up", "Status", nil, nil),
 		"keepalived_vrrp_state": prometheus.NewDesc(
 			"keepalived_vrrp_state",
 			"State of vrrp",
-			[]string{"iname", "intf", "vrid", "ip_address"},
+			[]string{"iname", "intf", "vrid", "ip_address", "error"},
 			nil,
 		),
 		"keepalived_vrrp_excluded_state": prometheus.NewDesc(
 			"keepalived_vrrp_excluded_state",
 			"State of vrrp with excluded VIP",
-			[]string{"iname", "intf", "vrid", "ip_address"},
+			[]string{"iname", "intf", "vrid", "ip_address", "error"},
 			nil,
 		),
 		"keepalived_exporter_check_script_status": prometheus.NewDesc(
 			"keepalived_exporter_check_script_status",
 			"Check Script status for each VIP",
-			[]string{"iname", "intf", "vrid", "ip_address"},
+			[]string{"iname", "intf", "vrid", "ip_address", "error"},
 			nil,
 		),
 		"keepalived_gratuitous_arp_delay_total": prometheus.NewDesc(
@@ -596,13 +654,13 @@ func (k *KeepalivedCollector) fillMetrics() {
 		"keepalived_script_status": prometheus.NewDesc(
 			"keepalived_script_status",
 			"Tracker Script Status",
-			[]string{"name"},
+			[]string{"name", "error"},
 			nil,
 		),
 		"keepalived_script_state": prometheus.NewDesc(
 			"keepalived_script_state",
 			"Tracker Script State",
-			[]string{"name"},
+			[]string{"name", "error"},
 			nil,
 		),
 	}
