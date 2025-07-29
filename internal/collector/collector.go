@@ -156,6 +156,13 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 	k.newConstMetric(ch, "keepalived_up", prometheus.GaugeValue, keepalivedUp)
 
 	if keepalivedUp == 0 {
+		k.newConstMetric(
+			ch,
+			"keepalived_vrrp_process_up",
+			prometheus.GaugeValue,
+			0,
+			"unknown", "unknown", "unknown", "unknown", "unknown", "unknown",
+		)
 		return
 	}
 
@@ -364,6 +371,35 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				"",
 			)
 		}
+		
+		roleMap := map[int]string{
+			0: "INIT",
+			1: "BACKUP",
+			2: "MASTER",
+			3: "FAULT",
+		}
+		roleStr := roleMap[vrrp.Data.State]
+		
+		for _, ip := range vrrp.Data.VIPs {
+			ipAddr, _, ok := ParseVIP(ip)
+			if !ok {
+				continue
+			}
+		
+			k.newConstMetric(
+				ch,
+				"keepalived_vrrp_process_up",
+				prometheus.GaugeValue,
+				1, 
+				vrrp.Data.IName,
+				vrrp.Data.Intf,
+				strconv.Itoa(vrrp.Data.VRID),
+				ipAddr,
+				vrrp.Data.Intf, 
+				roleStr,
+			)
+		}
+		
 	}
 
 	for _, script := range keepalivedStats.Scripts {
@@ -605,5 +641,12 @@ func (k *KeepalivedCollector) fillMetrics() {
 			[]string{"name"},
 			nil,
 		),
+		"keepalived_vrrp_process_up": prometheus.NewDesc(
+			"keepalived_vrrp_process_up",
+			"Whether keepalived is running and VRRP instance is available",
+			[]string{"iname", "intf", "vrid", "ip_address", "hostname", "role"},
+			nil,
+		),
+
 	}
 }
