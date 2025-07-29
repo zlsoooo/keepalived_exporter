@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"net"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/prometheus/client_golang/prometheus"
@@ -124,6 +125,7 @@ func (k *KeepalivedCollector) newConstMetric(
 
 // Collect get metrics and add to prometheus metric channel.
 func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
+	localIP := getLocalIP()
 	k.Lock()
 	defer k.Unlock()
 
@@ -395,7 +397,7 @@ func (k *KeepalivedCollector) Collect(ch chan<- prometheus.Metric) {
 				vrrp.Data.Intf,
 				strconv.Itoa(vrrp.Data.VRID),
 				ipAddr,
-				vrrp.Data.Intf, 
+				localIP, 
 				roleStr,
 			)
 		}
@@ -649,4 +651,35 @@ func (k *KeepalivedCollector) fillMetrics() {
 		),
 
 	}
+}
+
+func getLocalIP() string {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return "unknown"
+	}
+	for _, iface := range ifaces {
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip == nil || ip.IsLoopback() {
+				continue
+			}
+			ip = ip.To4()
+			if ip == nil {
+				continue // not an ipv4 address
+			}
+			return ip.String()
+		}
+	}
+	return "unknown"
 }
